@@ -35,7 +35,15 @@ def send_email(name, email, phone):
     except Exception as e:
         print("Email failed:", e)
         return False
-    
+
+st.markdown("""
+    <style>
+        .block-container {
+            padding-top: 1rem;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 st.title("MJ Estates AI Assistant")
 st.markdown("""
 Welcome to MJ's AI Team!
@@ -113,3 +121,14 @@ if submitted:
         st.success("Thanks! An agent will contact you soon.")
     else:
         st.error("There was an issue sending your message.")
+
+st.markdown("""
+---  
+<small>
+⚠️ This AI assistant provides general real estate information and is not a substitute for professional advice. For personalized guidance, please speak directly with an MJ Estates agent.
+</small>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<small>[← Back to MJ Estates Website](https://mjestates.com)</small>
+""", unsafe_allow_html=True)

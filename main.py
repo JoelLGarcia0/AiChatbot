@@ -1,4 +1,8 @@
 import streamlit as st
+
+st.set_page_config(page_title="MJ Estates AI Assistant", page_icon="mjestatesicon.png", layout="centered")
+
+
 from openai import OpenAI
 import os
 import smtplib
@@ -32,7 +36,6 @@ def send_email(name, email, phone):
         print("Email failed:", e)
         return False
     
-st.set_page_config(page_title="MJ Estates AI Assistant", page_icon="mjestatesicon.png", layout="centered")
 st.title("MJ Estates AI Assistant")
 st.markdown("""
 Welcome to MJ's AI Team!

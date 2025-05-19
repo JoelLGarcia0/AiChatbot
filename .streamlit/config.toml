@@ -1,0 +1,15 @@
+[server]
+headless = true
+
+[theme]
+base = "light"
+primaryColor = "#C0C0C0"  # silver
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f7f7f7"
+textColor = "#333333"
+font = "sans serif"
+
+
+[client]
+showSidebarNavigation = false
+toolbarMode = "minimal"

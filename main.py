@@ -32,9 +32,11 @@ def send_email(name, email, phone):
         print("Email failed:", e)
         return False
     
-st.set_page_config(page_title="MJ Estates AI Assistant", layout="centered")
-st.title("Welcome to MJ Estates AI Assistant")
+st.set_page_config(page_title="MJ Estates AI Assistant", page_icon="mjestatesicon.png", layout="centered")
+st.title("MJ Estates AI Assistant")
 st.markdown("""
+Welcome to MJ's AI Team!
+            
 Since 2007, MJ Estates has proudly served the Miami-Dade real estate market — from luxury homes to income-producing investments.
 
 Ask me anything about:
@@ -91,9 +93,14 @@ if len(st.session_state.chat_history) >= 10:
 
 st.subheader("Want to speak to an MJ Estates Agent?")
 with st.form("lead_capture"):
-    name = st.text_input("Your Name")
-    email = st.text_input("Your Email")
-    phone = st.text_input("Phone Number (optional)")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        name = st.text_input("Your Name")
+        email = st.text_input("Your Email")
+    with col2:
+        phone = st.text_input("Phone Number (optional)")
+
     submitted = st.form_submit_button("Send")
 
 

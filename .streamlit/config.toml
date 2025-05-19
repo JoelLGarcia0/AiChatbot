@@ -5,7 +5,7 @@ headless = true
 base = "light"
 primaryColor = "#C0C0C0"  # silver
 backgroundColor = "#ffffff"
-secondaryBackgroundColor = "#f7f7f7"
+secondaryBackgroundColor = "##d6d4d4"
 textColor = "#333333"
 font = "sans serif"
 

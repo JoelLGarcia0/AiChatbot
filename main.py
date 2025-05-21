@@ -133,8 +133,11 @@ You help users with:
     limit_warning = "You've reached the maximum number of questions for this session."
     disclaimer = "⚠️ This AI assistant provides general real estate information and is not a substitute for professional advice. For personalized guidance, please speak directly with an MJ Estates agent."
     back_link = "← Back to MJ Estates Website"
-
+st.markdown(f"""
+<small><a href="https://mjestates.com" target="_blank">{back_link}</a></small>
+""", unsafe_allow_html=True)
 st.title(title)
+
 st.markdown(intro)
 
 if "chat_history" not in st.session_state:
@@ -167,38 +170,44 @@ if user_input:
 
     with st.chat_message("assistant", avatar="mjestatesicon.png"):
         st.markdown(reply)
+   
+
+    st.markdown("""
+    <script>
+        setTimeout(() => {
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }, 200);
+    </script>
+""", unsafe_allow_html=True)
 
     st.session_state.chat_history.append((user_input, reply))
 
 if len(st.session_state.chat_history) >= 10:
     st.warning(limit_warning)
     st.stop()
-
-st.subheader(lead_title)
-with st.form("lead_capture"):
-    col1, col2 = st.columns(2)
-
-    with col1:
-        name = st.text_input(name_label)
-        email = st.text_input(email_label)
-    with col2:
-        phone = st.text_input(phone_label)
-
-    submitted = st.form_submit_button(submit_button)
-
-if submitted:
-    success = send_email(name, email, phone)
-    if success:
-        st.success(success_msg)
-    else:
-        st.error(error_msg)
-
 st.markdown(f"""
 ---  
 <small>{disclaimer}</small>
 """, unsafe_allow_html=True)
 
-st.markdown(f"""
-<small><a href="https://mjestates.com" target="_blank">{back_link}</a></small>
-""", unsafe_allow_html=True)
+with st.expander(lead_title):
+    with st.form("lead_capture"):
+        col1, col2 = st.columns(2)
+
+        with col1:
+            name = st.text_input(name_label)
+            email = st.text_input(email_label)
+        with col2:
+            phone = st.text_input(phone_label)
+
+        submitted = st.form_submit_button(submit_button)
+
+    if submitted:
+        success = send_email(name, email, phone)
+        if success:
+            st.success(success_msg)
+        else:
+            st.error(error_msg)
+
+
 

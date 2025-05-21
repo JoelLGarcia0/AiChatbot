@@ -32,6 +32,31 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+def send_email(name, email, phone):
+    broker_email = os.getenv("BROKER_EMAIL")
+    email_sender = os.getenv("EMAIL_SENDER")
+    email_password = os.getenv("EMAIL_PASSWORD")
+
+    msg = EmailMessage()
+    msg['Subject'] = "New MJ Estates Lead from AI Chatbot"
+    msg['From'] = email_sender
+    msg['To'] = broker_email
+
+    msg.set_content(
+        f"New lead submitted:\n\nName: {name}\nEmail: {email}\nPhone: {phone if phone else 'N/A'}"
+    )
+
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+            smtp.login(email_sender, email_password)
+            smtp.send_message(msg)
+        return True 
+    except Exception as e:
+        print("Email failed:", e)
+        return False
+    
+    
+
 # Language toggle
 language_is_spanish = st.toggle("Language: English / Español")
 language = "Español" if language_is_spanish else "English"
@@ -51,6 +76,7 @@ Pregúntame sobre:
 - Programar un recorrido o hablar con un agente
 """
     system_prompt = """Eres el asistente virtual de bienes raíces de MJ Estates. MJ Estates es una empresa de bienes raíces en Miami-Dade. Si el usuario escribe en español, responde completamente en español. Sé profesional, claro y útil.
+    Evita hacer promesas como contactar a un prestamista o programar citas, a menos que el usuario envíe el formulario de contacto. Deja claro que eres un asistente y que cualquier acción requiere el seguimiento de un agente.
 
 Puedes ayudar con:
 - Compra o venta de propiedades
@@ -85,6 +111,8 @@ Ask me anything about:
 - Scheduling a tour or speaking with an agent
 """
     system_prompt = """You are MJ Estates' virtual real estate assistant. MJ Estates is a full-service real estate firm based in Miami-Dade. If the user writes in Spanish, respond in Spanish. Otherwise, reply in English. Be helpful, brief, and professional.
+    Avoid making promises such as contacting a lender or scheduling appointments unless the user submits the contact form. Make clear that you're an assistant and actions require agent follow-up.
+
 
 You help users with:
 - Buying or selling property in Miami-Dade
@@ -112,29 +140,35 @@ st.markdown(intro)
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-user_input = st.text_input(chat_placeholder)
+for question, answer in st.session_state.chat_history:
+    with st.chat_message("user"):
+        st.markdown(question)
+    with st.chat_message("assistant", avatar="mjestatesicon.png"):
+        st.markdown(answer)
+
+user_input = st.chat_input(chat_placeholder)
 
 if user_input:
+    with st.chat_message("user"):
+        st.markdown(user_input)
     with st.spinner("Thinking..."):
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_input}
-        ]
+       
+        messages = [{"role": "system", "content": system_prompt}]
+        for question, answer in st.session_state.chat_history:
+            messages.append({"role": "user", "content": question})
+            messages.append({"role": "assistant", "content": answer})
+        messages.append({"role": "user", "content": user_input})
 
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages
         )
         reply = response.choices[0].message.content
-        st.session_state.chat_history.append((user_input, reply))
-        st.success(reply)
 
-if st.session_state.chat_history:
-    st.subheader(chat_history_title)
-    for question, answer in reversed(st.session_state.chat_history):
-        st.markdown(f"**You:** {question}")
-        st.markdown(f"**MJ Estates AI:** {answer}")
-        st.markdown("---")
+    with st.chat_message("assistant", avatar="mjestatesicon.png"):
+        st.markdown(reply)
+
+    st.session_state.chat_history.append((user_input, reply))
 
 if len(st.session_state.chat_history) >= 10:
     st.warning(limit_warning)
@@ -168,25 +202,3 @@ st.markdown(f"""
 <small><a href="https://mjestates.com" target="_blank">{back_link}</a></small>
 """, unsafe_allow_html=True)
 
-def send_email(name, email, phone):
-    broker_email = os.getenv("BROKER_EMAIL")
-    email_sender = os.getenv("EMAIL_SENDER")
-    email_password = os.getenv("EMAIL_PASSWORD")
-
-    msg = EmailMessage()
-    msg['Subject'] = "New MJ Estates Lead from AI Chatbot"
-    msg['From'] = email_sender
-    msg['To'] = broker_email
-
-    msg.set_content(
-        f"New lead submitted:\n\nName: {name}\nEmail: {email}\nPhone: {phone if phone else 'N/A'}"
-    )
-
-    try:
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-            smtp.login(email_sender, email_password)
-            smtp.send_message(msg)
-        return True 
-    except Exception as e:
-        print("Email failed:", e)
-        return False

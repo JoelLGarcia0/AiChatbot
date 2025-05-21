@@ -69,7 +69,6 @@ if language == "Español":
 - Comprar o vender una propiedad
 - Barrios locales (como Brickell, Homestead o Kendall)
 - Opciones de financiamiento e inversión
-- Programar un recorrido o hablar con un agente
 """
     system_prompt = """Eres el asistente virtual de bienes raíces de MJ Estates. MJ Estates es una empresa de bienes raíces en Miami-Dade. Si el usuario escribe en español, responde completamente en español. Sé profesional, claro y útil.
     Si el usuario desea hablar con un agente, no le pidas directamente su información de contacto. En su lugar, dile: "Por favor, desplázate hacia abajo y completa el formulario de contacto para que un agente de MJ Estates pueda comunicarse contigo.
@@ -100,9 +99,8 @@ Welcome to MJ's AI Team! Ask me anything about:
 - Buying or selling a home
 - Local neighborhoods (like Brickell, Homestead, or Kendall)
 - Financing and investment options
-- Scheduling a tour or speaking with an agent
 """
-    system_prompt = """You are MJ Estates' virtual real estate assistant. MJ Estates is a full-service real estate firm based in Miami-Dade. If the user writes in Spanish, respond in Spanish. Otherwise, reply in English. Be helpful and professional.
+    system_prompt = """You are MJ Estates' virtual real estate assistant. MJ Estates is a full-service real estate firm based in Miami-Dade. If the user writes in Spanish, respond in Spanish. Otherwise, reply in English. Be helpful, brief and professional.
     If a user wants to speak with an agent, do not ask them for their contact info directly. Instead, say something like: "Please scroll down and use the contact form to submit your information, and an MJ Estates agent will reach out to you.
 
 
@@ -163,21 +161,20 @@ if user_input:
         st.markdown(reply)
    
 
-    st.markdown("""
-    <script>
-    setTimeout(() => {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    }, 200);
-
-    setTimeout(() => {
-        if (document.activeElement) {
-            document.activeElement.blur();
-        }
-    }, 100);
-    </script>
-    """, unsafe_allow_html=True)
-
     st.session_state.chat_history.append((user_input, reply))
+
+    st.markdown("""
+<input id="blur-hack" style="position:absolute; top:-1000px; left:-1000px;" />
+<script>
+  setTimeout(() => {
+    // Blur to dismiss mobile keyboard
+    document.getElementById("blur-hack")?.focus();
+
+    // Scroll to bottom after new message appears
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+    }, 300);
+</script>
+""", unsafe_allow_html=True)
     
 
 if len(st.session_state.chat_history) >= 10:

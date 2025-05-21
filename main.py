@@ -72,14 +72,14 @@ if language == "Español":
 - Programar un recorrido o hablar con un agente
 """
     system_prompt = """Eres el asistente virtual de bienes raíces de MJ Estates. MJ Estates es una empresa de bienes raíces en Miami-Dade. Si el usuario escribe en español, responde completamente en español. Sé profesional, claro y útil.
-    Evita hacer promesas como contactar a un prestamista o programar citas, a menos que el usuario envíe el formulario de contacto. Deja claro que eres un asistente y que cualquier acción requiere el seguimiento de un agente.
+    Si el usuario desea hablar con un agente, no le pidas directamente su información de contacto. En su lugar, dile: "Por favor, desplázate hacia abajo y completa el formulario de contacto para que un agente de MJ Estates pueda comunicarse contigo.
+
 
 Puedes ayudar con:
 - Compra o venta de propiedades
 - Estrategias de inversión o alquiler
 - Proceso de compra, opciones de financiamiento y valoración
 - Información de barrios como Brickell, Homestead, Kendall
-- Programar recorridos o hablar con un agente
 """
     chat_placeholder = "Hazme una pregunta:"
     chat_history_title = "Historial de conversación"
@@ -91,7 +91,7 @@ Puedes ayudar con:
     success_msg = "¡Gracias! Un agente se pondrá en contacto contigo pronto."
     error_msg = "Hubo un problema al enviar tu mensaje."
     limit_warning = "Has alcanzado el número máximo de preguntas para esta sesión."
-    disclaimer = "⚠️ Este asistente de IA proporciona información general sobre bienes raíces y no reemplaza el asesoramiento profesional. Para orientación personalizada, comunícate con un agente de MJ Estates."
+    disclaimer = "⚠️ Este asistente ofrece información general. Contacta a un agente de MJ Estates para asesoría."
     back_link = "← Volver al sitio web de MJ Estates"
 else:
     title = "MJ Estates AI Assistant"
@@ -102,8 +102,8 @@ Welcome to MJ's AI Team! Ask me anything about:
 - Financing and investment options
 - Scheduling a tour or speaking with an agent
 """
-    system_prompt = """You are MJ Estates' virtual real estate assistant. MJ Estates is a full-service real estate firm based in Miami-Dade. If the user writes in Spanish, respond in Spanish. Otherwise, reply in English. Be helpful, brief, and professional.
-    Avoid making promises such as contacting a lender or scheduling appointments unless the user submits the contact form. Make clear that you're an assistant and actions require agent follow-up.
+    system_prompt = """You are MJ Estates' virtual real estate assistant. MJ Estates is a full-service real estate firm based in Miami-Dade. If the user writes in Spanish, respond in Spanish. Otherwise, reply in English. Be helpful and professional.
+    If a user wants to speak with an agent, do not ask them for their contact info directly. Instead, say something like: "Please scroll down and use the contact form to submit your information, and an MJ Estates agent will reach out to you.
 
 
 You help users with:
@@ -111,7 +111,6 @@ You help users with:
 - Renting, leasing, or investment strategies
 - Home buying process, financing, and valuation
 - Neighborhood info (Brickell, Homestead, Kendall)
-- Scheduling tours or speaking to an agent
 """
     chat_placeholder = "Ask me a question:"
     chat_history_title = "Chat History"
@@ -123,7 +122,7 @@ You help users with:
     success_msg = "Thanks! An agent will contact you soon."
     error_msg = "There was an issue sending your message."
     limit_warning = "You've reached the maximum number of questions for this session."
-    disclaimer = "⚠️ This AI assistant provides general real estate information and is not a substitute for professional advice. For personalized guidance, please speak directly with an MJ Estates agent."
+    disclaimer = "⚠️ This AI assistant provides general real estate information only. For professional advice, contact an MJ Estates agent."
     back_link = "← Back to MJ Estates Website"
 st.markdown(f"""
 <small><a href="https://mjestates.com" target="_blank">{back_link}</a></small>
@@ -166,13 +165,20 @@ if user_input:
 
     st.markdown("""
     <script>
-        setTimeout(() => {
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        }, 200);
+    setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }, 200);
+
+    setTimeout(() => {
+        if (document.activeElement) {
+            document.activeElement.blur();
+        }
+    }, 100);
     </script>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
     st.session_state.chat_history.append((user_input, reply))
+    
 
 if len(st.session_state.chat_history) >= 10:
     st.warning(limit_warning)

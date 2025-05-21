@@ -23,7 +23,7 @@ st.markdown("""
             padding-top: 2.5rem;
         }
               .st-emotion-cache-1v0mbdj {
-            padding-top: 0rem;  /* This class often wraps st.title */
+            padding-top: 0rem; 
         }
         h1 {
             padding-top: 0rem !important;
@@ -65,11 +65,7 @@ language = "Español" if language_is_spanish else "English"
 if language == "Español":
     title = "Asistente de IA de MJ Estates"
     intro = """
-¡Bienvenido al equipo de IA de MJ Estates!
-
-Desde 2007, MJ Estates ha servido con orgullo al mercado inmobiliario de Miami-Dade, desde casas de lujo hasta propiedades de inversión.
-
-Pregúntame sobre:
+¡Bienvenido al equipo de IA de MJ Estates! Pregúntame sobre:
 - Comprar o vender una propiedad
 - Barrios locales (como Brickell, Homestead o Kendall)
 - Opciones de financiamiento e inversión
@@ -100,11 +96,7 @@ Puedes ayudar con:
 else:
     title = "MJ Estates AI Assistant"
     intro = """
-Welcome to MJ's AI Team!
-
-Since 2007, MJ Estates has proudly served the Miami-Dade real estate market — from luxury homes to income-producing investments.
-
-Ask me anything about:
+Welcome to MJ's AI Team! Ask me anything about:
 - Buying or selling a home
 - Local neighborhoods (like Brickell, Homestead, or Kendall)
 - Financing and investment options

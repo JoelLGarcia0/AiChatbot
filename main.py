@@ -5,33 +5,22 @@ import os
 import smtplib
 from email.message import EmailMessage
 from dotenv import load_dotenv
+from supabase import create_client, Client
 
-# Page config
+# Config
 st.set_page_config(page_title="MJ Estates AI Assistant", page_icon="mjestatesicon.png", layout="centered")
-
-# Load .env and OpenAI
 load_dotenv()
 client = OpenAI()
 
-# Load and display logo
+# Load Supabase client
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# Load logo
 logo = Image.open("mjestatesicon.png")
 
-# Custom style
-st.markdown("""
-    <style>
-        .block-container {
-            padding-top: 2.5rem;
-        }
-              .st-emotion-cache-1v0mbdj {
-            padding-top: 0rem; 
-        }
-        h1 {
-            padding-top: 0rem !important;
-            margin-top: 0rem !important;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
+# Email handling
 def send_email(name, email, phone):
     broker_email = os.getenv("BROKER_EMAIL")
     email_sender = os.getenv("EMAIL_SENDER")
@@ -41,44 +30,35 @@ def send_email(name, email, phone):
     msg['Subject'] = "New MJ Estates Lead from AI Chatbot"
     msg['From'] = email_sender
     msg['To'] = broker_email
-
-    msg.set_content(
-        f"New lead submitted:\n\nName: {name}\nEmail: {email}\nPhone: {phone if phone else 'N/A'}"
-    )
+    msg.set_content(f"New lead submitted:\n\nName: {name}\nEmail: {email}\nPhone: {phone or 'N/A'}")
 
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
             smtp.login(email_sender, email_password)
             smtp.send_message(msg)
-        return True 
+        return True
     except Exception as e:
         print("Email failed:", e)
         return False
-    
-    
+
+# Get dynamic system prompt from Supabase
+def get_prompt(lang):
+    result = supabase.table("prompts").select("*").eq("language", lang).single().execute()
+    return result.data["prompt"]
 
 # Language toggle
 language_is_spanish = st.toggle("Language: English / Español")
-language = "Español" if language_is_spanish else "English"
+language_code = "spanish" if language_is_spanish else "english"
+system_prompt = get_prompt(language_code)
 
-# Set prompts based on language
-if language == "Español":
+# UI labels per language
+if language_is_spanish:
     title = "Asistente de IA de MJ Estates"
     intro = """
 ¡Bienvenido al equipo de IA de MJ Estates! Pregúntame sobre:
 - Comprar o vender una propiedad
 - Barrios locales (como Brickell, Homestead o Kendall)
 - Opciones de financiamiento e inversión
-"""
-    system_prompt = """Eres el asistente virtual de bienes raíces de MJ Estates. MJ Estates es una empresa de bienes raíces en Miami-Dade. Si el usuario escribe en español, responde completamente en español. Sé profesional, claro y útil.
-    Si el usuario desea hablar con un agente, no le pidas directamente su información de contacto. En su lugar, dile: "Por favor, desplázate hacia abajo y completa el formulario de contacto para que un agente de MJ Estates pueda comunicarse contigo.
-
-
-Puedes ayudar con:
-- Compra o venta de propiedades
-- Estrategias de inversión o alquiler
-- Proceso de compra, opciones de financiamiento y valoración
-- Información de barrios como Brickell, Homestead, Kendall
 """
     chat_placeholder = "Hazme una pregunta:"
     chat_history_title = "Historial de conversación"
@@ -100,16 +80,6 @@ Welcome to MJ's AI Team! Ask me anything about:
 - Local neighborhoods (like Brickell, Homestead, or Kendall)
 - Financing and investment options
 """
-    system_prompt = """You are MJ Estates' virtual real estate assistant. MJ Estates is a full-service real estate firm based in Miami-Dade. If the user writes in Spanish, respond in Spanish. Otherwise, reply in English. Be helpful, brief and professional.
-    If a user wants to speak with an agent, do not ask them for their contact info directly. Instead, say something like: "Please scroll down and use the contact form to submit your information, and an MJ Estates agent will reach out to you.
-
-
-You help users with:
-- Buying or selling property in Miami-Dade
-- Renting, leasing, or investment strategies
-- Home buying process, financing, and valuation
-- Neighborhood info (Brickell, Homestead, Kendall)
-"""
     chat_placeholder = "Ask me a question:"
     chat_history_title = "Chat History"
     lead_title = "Want to speak to an MJ Estates Agent?"
@@ -122,11 +92,10 @@ You help users with:
     limit_warning = "You've reached the maximum number of questions for this session."
     disclaimer = "⚠️ This AI assistant provides general real estate information only. For professional advice, contact an MJ Estates agent."
     back_link = "← Back to MJ Estates Website"
-st.markdown(f"""
-<small><a href="https://mjestates.com" target="_blank">{back_link}</a></small>
-""", unsafe_allow_html=True)
-st.title(title)
 
+# Render
+st.markdown(f"""<small><a href="https://mjestates.com" target="_blank">{back_link}</a></small>""", unsafe_allow_html=True)
+st.title(title)
 st.markdown(intro)
 
 if "chat_history" not in st.session_state:
@@ -144,7 +113,6 @@ if user_input:
     with st.chat_message("user"):
         st.markdown(user_input)
     with st.spinner("Thinking..."):
-       
         messages = [{"role": "system", "content": system_prompt}]
         for question, answer in st.session_state.chat_history:
             messages.append({"role": "user", "content": question})
@@ -159,7 +127,6 @@ if user_input:
 
     with st.chat_message("assistant", avatar="mjestatesicon.png"):
         st.markdown(reply)
-   
 
     st.session_state.chat_history.append((user_input, reply))
 
@@ -167,28 +134,22 @@ if user_input:
 <input id="blur-hack" style="position:absolute; top:-1000px; left:-1000px;" />
 <script>
   setTimeout(() => {
-    // Blur to dismiss mobile keyboard
     document.getElementById("blur-hack")?.focus();
-
-    // Scroll to bottom after new message appears
     window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
-    }, 300);
+  }, 300);
 </script>
 """, unsafe_allow_html=True)
-    
 
 if len(st.session_state.chat_history) >= 10:
     st.warning(limit_warning)
     st.stop()
-st.markdown(f"""
----  
-<small>{disclaimer}</small>
-""", unsafe_allow_html=True)
+
+st.markdown("---")
+st.markdown(f"<small>{disclaimer}</small>", unsafe_allow_html=True)
 
 with st.expander(lead_title):
     with st.form("lead_capture"):
         col1, col2 = st.columns(2)
-
         with col1:
             name = st.text_input(name_label)
             email = st.text_input(email_label)
@@ -203,6 +164,3 @@ with st.expander(lead_title):
             st.success(success_msg)
         else:
             st.error(error_msg)
-
-
-

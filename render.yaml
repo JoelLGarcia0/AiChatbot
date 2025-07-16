@@ -6,3 +6,11 @@ services:
     buildCommand: "pip install -r requirements.txt"
     startCommand: "streamlit run main.py"
     healthCheckPath: "/_stcore/health"
+
+  - type: web
+    name: mj-dashboard
+    env: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "streamlit run dashboard.py"
+    healthCheckPath: "/_stcore/health"

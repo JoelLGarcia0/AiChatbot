@@ -3,4 +3,3 @@ openai
 python-dotenv
 supabase
 deep-translator
-supabase-py
